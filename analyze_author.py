@@ -14,6 +14,8 @@ API_ENDPOINT = "https://www.ncbi.nlm.nih.gov/myncbi/browse/collection"
 result_count = float('Inf')
 num_pages = float('Inf')
 # location given here
+#test_url = sys.argv[1]
+
 collection_id_field_name = 'MixedCollectionBrowserApp.MixedCollectionBrowser.RequestProcessor.CollectionId'
 page_size_field_name = 'MixedCollectionBrowserApp.MixedCollectionBrowser.DisplayOptions.PageSize'
 page_no_field_name = 'MixedCollectionBrowserApp.MixedCollectionBrowser.MixedCollectionPager.PageNo'
@@ -21,9 +23,9 @@ result_count_field_name = 'MixedCollectionBrowserApp.MixedCollectionBrowser.Disp
 
 
 test_url = 'https://www.ncbi.nlm.nih.gov/sites/myncbi/paul.heidenreich.1/bibliography/50217161/public/?sort=date&direction=ascending'
-
+test_url2 = 'https://www.ncbi.nlm.nih.gov/sites/myncbi/1nmVZPkrS-eQ0/bibliography/53996959/public/?sort=date&direction=ascending'
 #connect to link and then parse out collection_id:
-first_results = requests.get(url = test_url)
+first_results = requests.get(url = test_url2)
 first_soup = BeautifulSoup(first_results.text, 'html.parser')
 collection_id = first_soup.find("input", {"name": collection_id_field_name})['value']
 
@@ -32,7 +34,7 @@ print 'collection_id: ' + collection_id
 
 
 #collection_id = 50217161
-page_size = 200
+page_size = 10
 page_no = 1
 
 while (page_no <= num_pages):
@@ -58,6 +60,9 @@ while (page_no <= num_pages):
     #title="Last page of results"
     if num_pages == float('Inf'):
         num_pages = float(soup.find("a", {"title": 'Last page of results'})['page'])
+        if num_pages is None:
+            print 'ONLY ONE PAGE:'
+            num_pages = 1
     print num_pages
 
     if result_count == float('Inf'):
@@ -102,7 +107,45 @@ cite_response = requests.get(
     ]),
 )
 pubs = cite_response.json()
-print(pubs)
+
+
+#print(pubs)
+print(type(pubs))
+
+#CALCULATE H_INDEX:
+def get_h_index(cite_val_list):
+    cite_val_list.sort(reverse=True)
+    for index, value in enumerate(cite_val_list):
+        if value < index + 1:
+            return index
+    return len(cite_val_list)
+#get list of citation of counts:
+citation_count_list = [x['citation_count'] for x in pubs['data']]
+citation_count_list.sort(reverse=True)
+
+
+print 'citation count list: ' , citation_count_list
+print get_h_index(citation_count_list)
+
+print get_h_index([1, 1, 2, 3, 4, 5])
+print get_h_index([1, 1, 1, 1, 1, 1, 1])
+print get_h_index([0, 0, 0, 0, 0, 0, 0])
+print get_h_index([1000, 20, 304, 104, 10, 30, 30])
+
+
+
+
+
+
+
+for index, value in enumerate(citation_count_list):
+    if value < index + 1:
+        print 'h-index: ' +  str(index)
+        break
+
+
+
+#print pubs['data'][0]
 
 
     #pmid_divs.find(dd="rprtid"))
