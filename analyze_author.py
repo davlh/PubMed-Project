@@ -1,6 +1,7 @@
 # import libraries for web scraping:
 import urllib2
 import sys
+import util
 from bs4 import BeautifulSoup
 # importing the requests library
 import requests
@@ -103,44 +104,7 @@ def get_h_index(cite_val_list):
 
 
 #remove pmc ids, as they are not compatible with icite, which is next step
-def get_stats(pmids):
-    #remove pmc ids:
-    pmid_list_no_pmc = [x for x in pmids if ('PMC' not in x)]
 
-    print 'no_pmc count: ' + str(len(pmid_list_no_pmc))
-    comma_sep_pmid_list = ",".join(pmid_list_no_pmc)
-    #print comma_sep_pmid_list
-    querty_str = 'pubs?pmids=' + comma_sep_pmid_list
-    #get cited stuff by using icite api:
-    cite_response = requests.get(
-        "/".join([
-            "https://icite.od.nih.gov/api",
-            querty_str,
-            ]),
-    )
-    #get json response from icite api:
-    pubs = cite_response.json()
-    #print(pubs)
-    print(type(pubs))
-    #get list of citation of counts:
-    citation_count_list = [x['citation_count'] for x in pubs['data']]
-    citation_count_list.sort(reverse=True)
-    print 'citation count list: ' , citation_count_list
-    h_index = get_h_index(citation_count_list)
-    print 'H_INDEX: ' + str(h_index)
-    total_citations = sum(citation_count_list)
-    print 'TOTAL CITATIONS ACROSS ALL PAPERS: ' + str(total_citations)
-    rcrs = [x['relative_citation_ratio'] for x in pubs['data']]
-    print 'RCR values: '
-    rcrs_no_none = [x for x in rcrs if (x is not None)]
-    #print rcrs
-    rcr_sum = sum(rcrs_no_none)
-    print 'relative citation ratio sum across all papers: ' + str(rcr_sum)
-    stats_dict = collections.defaultdict(float)
-    stats_dict['rcr_sum']= rcr_sum
-    stats_dict['h_index']= h_index
-    stats_dict['total_citations']= total_citations
-    return stats_dict
 
 #print get_h_index([1, 1, 2, 3, 4, 5])
 #print get_h_index([1, 1, 1, 1, 1, 1, 1])
@@ -161,7 +125,7 @@ csv_dict = {}
 for link in links:
     print link
     pmids = get_pmids_from_link(link)
-    stats_dict = get_stats(pmids)
+    stats_dict = util.get_stats(pmids)
     csv_dict[link] = pd.Series(stats_dict)
 result_df = pd.DataFrame(csv_dict)
 result_df.to_csv(result_csv_file_name)
