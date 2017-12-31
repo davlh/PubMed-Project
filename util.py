@@ -17,6 +17,7 @@ def get_h_index(cite_val_list):
 
 def get_stats(pmids):
     #remove pmc ids:
+    stats_dict = collections.defaultdict(float)
     if len(pmids) == 0:
         return collections.defaultdict(float)
 
@@ -36,8 +37,19 @@ def get_stats(pmids):
     pubs = cite_response.json()
     #print(pubs)
     #print(type(pubs))
+    #total articles:
+    total_articles = len(pubs['data'])
+    stats_dict['total_articles'] = total_articles
+    if total_articles == 0:
+        stats_dict['unable_to_find_any_articles'] = 'true'
+        return stats_dict
+
+
+
+
+
     #get list of citation of counts:
-    citation_count_list = [x['citation_count'] for x in pubs['data']]
+    citation_count_list = [x['citation_count'] for x in pubs['data'] if (x['citation_count'] is not None)]
     citation_count_list.sort(reverse=True)
     #print 'citation count list: ' , citation_count_list
     h_index = get_h_index(citation_count_list)
@@ -50,15 +62,16 @@ def get_stats(pmids):
     #print rcrs
     rcr_sum = sum(rcrs_no_none)
     #print 'relative citation ratio sum across all papers: ' + str(rcr_sum)
-    stats_dict = collections.defaultdict(float)
+
     stats_dict['rcr_sum']= rcr_sum
     stats_dict['h_index']= h_index
     stats_dict['total_citations']= total_citations
 
     #avg citations per year:
-    citations_per_year = [x['citations_per_year'] for x in pubs['data']]
-    avg_nih_percentile = sum(citations_per_year) / len(citations_per_year)
-    stats_dict['avg_citations_per_year']= avg_nih_percentile
+    citations_per_year = [x['citations_per_year'] for x in pubs['data'] if (x['citations_per_year'] is not None)]
+    if len(citations_per_year) > 0:
+        avg_citations_per_year = sum(citations_per_year) / len(citations_per_year)
+        stats_dict['avg_citations_per_year']= avg_citations_per_year
 
 
     #avg nih-percintle
@@ -70,7 +83,6 @@ def get_stats(pmids):
     else:
         avg_nih_percentile = sum(nih_percentiles) / len(nih_percentiles)
         stats_dict['avg_nih_percentile']= avg_nih_percentile
-    #total articles:
-    stats_dict['total_articles']= len(pubs['data'])
+
 
     return stats_dict
