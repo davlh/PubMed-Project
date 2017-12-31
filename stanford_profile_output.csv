@@ -1,3 +1,3 @@
-,avg_citations_per_year,avg_nih_percentile,h_index,rcr_sum,total_articles,total_citations,url
-mehdi-skhiri,3.4444445,59.616666666666674,5,9.55087,6,123,https://profiles.stanford.edu/mehdi-skhiri?tab=publications
-melinda-telli,7.746303586956522,59.37000000000002,22,128.088774,47,1648,https://profiles.stanford.edu/melinda-telli?tab=publications
+,avg_citations_per_year,avg_nih_percentile,h_index,pmid_of_no_citations,rcr_sum,total_articles,total_citations,url
+mehdi-skhiri,3.4444445,59.616666666666674,5,[],9.55087,6,123,https://profiles.stanford.edu/mehdi-skhiri?tab=publications
+melinda-telli,7.746303586956522,59.37000000000002,22,[29134191],128.088774,47,1648,https://profiles.stanford.edu/melinda-telli?tab=publications

@@ -1,8 +1,15 @@
 
+import urllib2
+import sys
+import util
+from bs4 import BeautifulSoup
+# importing the requests library
 import requests
-import collections
+#for reading csv file:
 import pandas as pd
 import collections
+import util
+import re
 
 
 
@@ -19,7 +26,8 @@ def get_stats(pmids):
     #remove pmc ids:
     stats_dict = collections.defaultdict(float)
     if len(pmids) == 0:
-        return collections.defaultdict(float)
+        stats_dict['no_pmids_found'] = 'true'
+        return stats_dict
 
     pmid_list_no_pmc = [x for x in pmids if ('PMC' not in x)]
     #print 'no_pmc count: ' + str(len(pmid_list_no_pmc))
@@ -41,7 +49,7 @@ def get_stats(pmids):
     total_articles = len(pubs['data'])
     stats_dict['total_articles'] = total_articles
     if total_articles == 0:
-        stats_dict['unable_to_find_any_articles'] = 'true'
+        stats_dict['unable_to_find_any_articles_from_pmids'] = 'true'
         return stats_dict
 
 
@@ -68,6 +76,8 @@ def get_stats(pmids):
     stats_dict['total_citations']= total_citations
 
     #avg citations per year:
+    pmid_of_no_citations = [x['pmid'] for x in pubs['data'] if (x['citations_per_year'] is  None)]
+    stats_dict['pmid_of_no_citations'] = pmid_of_no_citations
     citations_per_year = [x['citations_per_year'] for x in pubs['data'] if (x['citations_per_year'] is not None)]
     if len(citations_per_year) > 0:
         avg_citations_per_year = sum(citations_per_year) / len(citations_per_year)
@@ -86,3 +96,14 @@ def get_stats(pmids):
 
 
     return stats_dict
+
+
+def stanford_profile_get_pmids_from_profile_link(link_url):
+    print 'link_url: ' + str(link_url)
+    pub_results = requests.get(url = link_url)
+    print 'json_response: ' + str(pub_results)
+    soup = BeautifulSoup(pub_results.text, 'html.parser')
+    pmids_text = soup.find_all(text = re.compile(".*PubMedID.*"))
+    pmids_no_label = [x.split(' ')[1] for x in pmids_text]
+    print pmids_no_label
+    return pmids_no_label

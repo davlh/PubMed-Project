@@ -50,15 +50,17 @@ def get_pmids_from_link(link):
         # defining a params dict for the parameters to be sent to the API
         # sending get request and saving the response as response object
         results = requests.get(url = API_ENDPOINT, params = PARAMS)
-        print 'URL: ' + results.url
+        print 'attempting to connect to URL: ' + results.url
         c = results.text
-        print results.status_code
+        print 'response status: ' + str(results.status_code)
         #print c
         # extracting data in json format
         #parse html response:
         soup = BeautifulSoup(c, 'html.parser')
-        #find all dd-tags - which correspond to pmids
-        pmid_list_tag = soup.findAll("dd")
+        #find all mini-profile class objects, corresponding to an individual researcher
+        mini-profile
+        soup.find_all("a", class_="mini-profile")
+        author_link_tag = soup.findAll("dd")
         print 'Length of pmid_tag_list: ' + str(len(pmid_list_tag))
         #find result- number of total pmids
 
